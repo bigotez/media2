@@ -1,0 +1,8 @@
+.env
+emby/**/*
+letsencrypt/**/*
+prowlarr/**/*
+proxy/**/*
+qbittorrent/**/*
+radarr/**/*
+sonarr/**/*
