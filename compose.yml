@@ -1,14 +1,15 @@
 version: "3.9"
 services:
-  proxymgr:
-    image: 'jc21/nginx-proxy-manager:latest'
-    ports:
-      - "192.168.0.39:80:80"
-      - "192.168.0.39:443:443"
-      - "192.168.0.39:81:81"
-    volumes:
-      - ./proxy:/data
-      - ./letsencrypt:/etc/letsencrypt
+  # proxymgr:
+  #   image: 'jc21/nginx-proxy-manager:latest'
+  #   ports:
+  #     - "192.168.4.39:80:80"
+  #     - "192.168.4.39:443:443"
+  #     - "192.168.4.39:81:81"
+  #   volumes:
+  #     - ./proxy:/data
+  #     - ./letsencrypt:/etc/letsencrypt
+  #   restart: always
   sonarr:
     image: lscr.io/linuxserver/sonarr
     container_name: sonarr
@@ -43,6 +44,19 @@ services:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:7878/radarr/ping"]
       interval: 5s
       retries: 10
+  # bazarr:
+  #   image: lscr.io/linuxserver/bazarr:latest
+  #   container_name: bazarr
+  #   environment:
+  #     - PUID=${USER_ID}
+  #     - PGID=${GROUP_ID}
+  #     - TZ=${TIMEZONE}
+  #   volumes:
+  #     - ./bazarr:/config
+  #     - /data:/data
+  #   ports:
+  #     - 6767:6767
+  #   restart: unless-stopped
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -59,21 +73,90 @@ services:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:9696/prowlarr/ping" ]
       interval: 5s
       retries: 10
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:libtorrentv1
-    container_name: qbittorrent
+  deluge:
+    image: lscr.io/linuxserver/deluge:latest
+    container_name: deluge
     environment:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIMEZONE}
-      - WEBUI_PORT=8080
     ports:
-      - 8080:8080
+      - 8112:8112
+      - 6881:6881
+      - 6881:6881/udp
     volumes:
-      - ./qbittorrent:/config
+      - ./deluge:/config
       - ${DOWNLOAD_ROOT}:/data/torrents
     restart: always
+  # emby:
+  #   image: lscr.io/linuxserver/emby
+  #   container_name: emby
+  #   environment:
+  #     - PUID=${USER_ID}
+  #     - PGID=${GROUP_ID}
+  #     - TZ=${TIMEZONE}
+  #   volumes:
+  #     - ./emby:/config
+  #     - ${DATA_ROOT}:/data
+  #   ports:
+  #     - "8096:8096"
+  #     - "7359:7359/udp"
+  #     - "1900:1900/udp"
+  #   devices:
+  #     - /dev/dri/renderD128:/dev/dri/renderD128
+  #     - /dev/dri/card0:/dev/dri/card0
+    # restart: always
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./jellyfin:/config
+      - ${DATA_ROOT}:/data
+    ports:
+      - "8096:8096"
+      - "7359:7359/udp"
+      - "1900:1900/udp"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/card0:/dev/dri/card0
+    restart: unless-stopped
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./jellyseerr:/app/config
+    ports:
+      - 5055:5055
+    restart: always
     healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8080/api/v2/app/version" ]
+      test: ["CMD", "wget", "http://127.0.0.1:5055/api/v1/status", "-qO", "/dev/null"]
       interval: 5s
       retries: 10
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: always
+    environment:
+      - WATCHTOWER_CLEANUP=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  homeassistant:
+    image: lscr.io/linuxserver/homeassistant:latest
+    container_name: homeassistant
+    restart: always
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./homeassistant:/config
+    ports:
+      - "192.168.7.254:80:8123"
+    

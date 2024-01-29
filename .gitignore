@@ -1,4 +1,8 @@
 .env
+bazarr/**/*
+deluge/**/*
+jellyseerr/**/*
+homeassistant/**/*
 emby/**/*
 letsencrypt/**/*
 prowlarr/**/*
@@ -6,3 +10,4 @@ proxy/**/*
 qbittorrent/**/*
 radarr/**/*
 sonarr/**/*
+jellyfin/**/*
