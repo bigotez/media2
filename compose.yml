@@ -134,6 +134,21 @@ services:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:9696/prowlarr/ping" ]
       interval: 5s
       retries: 10
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.prowlarr.rule=(Host(`${HOSTNAME}`) && PathPrefix(`/prowlarr`))
+      - traefik.http.routers.prowlarr.tls=true
+      - traefik.http.routers.prowlarr.tls.certresolver=myresolver
+      - traefik.http.services.prowlarr.loadbalancer.server.port=9696
+      # - homepage.group=Download
+      # - homepage.name=Prowlarr
+      # - homepage.icon=prowlarr.png
+      # - homepage.href=/prowlarr
+      # - homepage.description=Indexers management
+      # - homepage.weight=4
+      # - homepage.widget.type=prowlarr
+      # - homepage.widget.url=http://prowlarr:9696/prowlarr
+      # - homepage.widget.key=${PROWLARR_API_KEY}
   deluge:
     image: lscr.io/linuxserver/deluge:latest
     container_name: deluge
