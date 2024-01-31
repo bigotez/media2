@@ -99,19 +99,25 @@ services:
       # - homepage.widget.type=radarr
       # - homepage.widget.url=http://radarr:7878/radarr
       # - homepage.widget.key=${RADARR_API_KEY}
-  # bazarr:
-  #   image: lscr.io/linuxserver/bazarr:latest
-  #   container_name: bazarr
-  #   environment:
-  #     - PUID=${USER_ID}
-  #     - PGID=${GROUP_ID}
-  #     - TZ=${TIMEZONE}
-  #   volumes:
-  #     - ./bazarr:/config
-  #     - /data:/data
-  #   ports:
-  #     - 6767:6767
-  #   restart: unless-stopped
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=${USER_ID}
+      - PGID=${GROUP_ID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./bazarr:/config
+      - /data:/data
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bazarr.rule=(Host(`${HOSTNAME}`) && PathPrefix(`/bazarr`))
+      - traefik.http.routers.bazarr.tls=true
+      - traefik.http.routers.bazarr.tls.certresolver=myresolver
+      - traefik.http.services.bazarr.loadbalancer.server.port=6767
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
